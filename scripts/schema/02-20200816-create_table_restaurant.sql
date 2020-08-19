@@ -12,6 +12,8 @@ CREATE TABLE [dbo].[Restaurant](
 	[Name] [nvarchar](255) NOT NULL,
 	[BannerImage] [image] NULL,
 	[LogoImage] [image] NULL,
+	[OpeningTime] [time](7) NOT NULL,
+	[ClosingTime] [time](7) NOT NULL,
  CONSTRAINT [PK_Restaurant] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

@@ -6,9 +6,9 @@ BEGIN
 	CREATE DATABASE [nombookerdb]
 
 	ALTER DATABASE [nombookerdb] MODIFY FILE
-	( NAME = N'nombookerdb', SIZE = 512MB, MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+	( NAME = N'nombookerdb', SIZE = 128MB, MAXSIZE = 256MB, FILEGROWTH = 1024KB )
 
 	ALTER DATABASE [nombookerdb] MODIFY FILE
-	( NAME = N'nombookerdb_log', SIZE = 256MB, MAXSIZE = UNLIMITED, FILEGROWTH = 10% )
+	( NAME = N'nombookerdb_log', SIZE = 64MB, MAXSIZE = 128MB, FILEGROWTH = 10% )
 END
 GO

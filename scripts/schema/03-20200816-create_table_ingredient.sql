@@ -11,10 +11,6 @@ CREATE TABLE [dbo].[Ingredient](
 	[Id] [uniqueidentifier] NOT NULL,
 	[Name] [nvarchar](255) NOT NULL,
 	[Description] [nvarchar](max) NULL,
-	[VeganFriendly] [bit] NULL,
-	[VegetarianFriendly] [bit] NULL,
-	[PossibleAllergen] [bit] NULL,
-	[Spicy] [bit] NULL,
  CONSTRAINT [PK_Ingredient] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

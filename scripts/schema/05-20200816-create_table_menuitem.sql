@@ -15,6 +15,10 @@ CREATE TABLE [dbo].[MenuItem](
 	[Price] [float] NOT NULL,
 	[RestaurantId] [uniqueidentifier] NOT NULL,
 	[Category] [smallint] NULL,
+	[VeganFriendly] [bit] NULL,
+	[VegetarianFriendly] [bit] NULL,
+	[PossibleAllergens] [nvarchar](255) NULL,
+	[Spicy] [bit] NULL,
  CONSTRAINT [PK_MenuItem] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

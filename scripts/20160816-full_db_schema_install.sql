@@ -6,10 +6,10 @@ BEGIN
 	CREATE DATABASE [nombookerdb]
 
 	ALTER DATABASE [nombookerdb] MODIFY FILE
-	( NAME = N'nombookerdb', SIZE = 512MB, MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+	( NAME = N'nombookerdb', SIZE = 128MB, MAXSIZE = 256MB, FILEGROWTH = 1024KB )
 
 	ALTER DATABASE [nombookerdb] MODIFY FILE
-	( NAME = N'nombookerdb_log', SIZE = 256MB, MAXSIZE = UNLIMITED, FILEGROWTH = 10% )
+	( NAME = N'nombookerdb_log', SIZE = 64MB, MAXSIZE = 128MB, FILEGROWTH = 10% )
 END
 GO
 
@@ -21,6 +21,8 @@ CREATE TABLE [dbo].[Restaurant](
 	[Name] [nvarchar](255) NOT NULL,
 	[BannerImage] [image] NULL,
 	[LogoImage] [image] NULL,
+	[OpeningTime] [time](7) NOT NULL,
+	[ClosingTime] [time](7) NOT NULL,
  CONSTRAINT [PK_Restaurant] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
@@ -32,10 +34,6 @@ CREATE TABLE [dbo].[Ingredient](
 	[Id] [uniqueidentifier] NOT NULL,
 	[Name] [nvarchar](255) NOT NULL,
 	[Description] [nvarchar](max) NULL,
-	[VeganFriendly] [bit] NULL,
-	[VegetarianFriendly] [bit] NULL,
-	[PossibleAllergen] [bit] NULL,
-	[Spicy] [bit] NULL,
  CONSTRAINT [PK_Ingredient] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
@@ -61,6 +59,10 @@ CREATE TABLE [dbo].[MenuItem](
 	[Price] [float] NOT NULL,
 	[RestaurantId] [uniqueidentifier] NOT NULL,
 	[Category] [smallint] NULL,
+	[VeganFriendly] [bit] NULL,
+	[VegetarianFriendly] [bit] NULL,
+	[PossibleAllergens] [nvarchar](255) NULL,
+	[Spicy] [bit] NULL,
  CONSTRAINT [PK_MenuItem] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
