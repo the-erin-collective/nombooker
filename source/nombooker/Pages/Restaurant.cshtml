@@ -18,98 +18,100 @@
         <span class="restuarant-page-details-name">@Model.Restaurant.Name</span>
         <h5>Open from @Model.Restaurant.OpeningTime.ToString().Remove(5) - @Model.Restaurant.ClosingTime.ToString().Remove(5)</h5>
     </div>
-    <div class="restuarant-page-reservation card shadow-sm">
-        <div class="restuarant-page-reservation-card-bg"></div>
-        <div class="restuarant-page-reservation-card-content">
-            <h3 class="ml-1">Make a reservation</h3>
-            <div class="restuarant-page-reservation-form">
-                <div class="restuarant-page-reservation-form-date">
-                    <div class="restuarant-page-reservation-date-block ml-3">
-                        <h5 class="restuarant-page-reservation-date-label">Select a date</h5>
-                        <div class="restuarant-page-reservation-date-input">
-                            <div><input type="date" name="datebutton" id="date-input"></div>
-                        </div>
-                        <div id="date-validation" class="restuarant-page-reservation-date-validation" style="display: none;">
-                            *Date cannot be in the past
-                        </div>
-                    </div>
-                </div>
-                <div class="restuarant-page-reservation-form-time">
-                    <div class="restuarant-page-reservation-date-block ml-3">
-                        <h5 class="restuarant-page-reservation-date-label">Select a time</h5>
-                        <div class="restuarant-page-reservation-date-input">
-                            <div><input id="time-input" type="time" name="timebutton" max="@Model.Restaurant.ClosingTime" min="@Model.Restaurant.OpeningTime" step="1800" pattern="[0-9]{2}:[0-9]{2}" required></div>
-                        </div>
-                        <div id="time-validation" class="restuarant-page-reservation-time-validation" style="display: none;">
-                            *Time cannot be outside trading hours
+    <form method="post" id="reservation-form">
+        <div class="restuarant-page-reservation card shadow-sm">
+            <div class="restuarant-page-reservation-card-bg"></div>
+            <div class="restuarant-page-reservation-card-content">
+                <h3 class="ml-1">Make a reservation</h3>
+                <div class="restuarant-page-reservation-form">
+                    <div class="restuarant-page-reservation-form-date">
+                        <div class="restuarant-page-reservation-date-block ml-3">
+                            <h5 class="restuarant-page-reservation-date-label">Select a date</h5>
+                            <div class="restuarant-page-reservation-date-input">
+                                <div><input type="date" name="datebutton" id="date-input"></div>
+                            </div>
+                            <div id="date-validation" class="restuarant-page-reservation-date-validation" style="display: none;">
+                                *Date cannot be in the past
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="restuarant-page-reservation-form-order">
-                    <div id="add-order-button" class="btn btn-secondary" style="display: block;" onclick="document.getElementById('menu-header').style.display = 'block';document.getElementById('menu').style.display = 'grid';">Add Order</div>
-                    <div id="order-total-container" style="display: none;"><div>Order Total</div><div id="order-total-amount"></div></div>
-                </div>
-                <div class="restuarant-page-reservation-form-submit">
-                    <div class="btn btn-primary" style="display: block;" onclick="submit();">Submit</div>
+                    <div class="restuarant-page-reservation-form-time">
+                        <div class="restuarant-page-reservation-date-block ml-3">
+                            <h5 class="restuarant-page-reservation-date-label">Select a time</h5>
+                            <div class="restuarant-page-reservation-date-input">
+                                <div><input id="time-input" type="time" name="timebutton" max="@Model.Restaurant.ClosingTime" min="@Model.Restaurant.OpeningTime" step="1800" pattern="[0-9]{2}:[0-9]{2}" required></div>
+                            </div>
+                            <div id="time-validation" class="restuarant-page-reservation-time-validation" style="display: none;">
+                                *Time cannot be outside trading hours
+                            </div>
+                        </div>
+                    </div>
+                    <div class="restuarant-page-reservation-form-order">
+                        <div id="add-order-button" class="btn btn-secondary" style="display: block;" onclick="document.getElementById('menu-header').style.display = 'block';document.getElementById('menu').style.display = 'grid';">Add Order</div>
+                        <div id="order-total-container" style="display: none;"><div>Order Total</div><div id="order-total-amount"></div></div>
+                    </div>
+                    <div class="restuarant-page-reservation-form-submit">
+                        <div class="btn btn-primary" style="display: block;" onclick="submit();">Submit</div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="menu-header" class="menu-header card p-1" style="display: none;">
-        <h3>Construct your order from the menu items below</h3>
-    </div>
-    <div id="menu" class="menu card p-1" style="display: none;">
-        @{short? lastCategory = -1;}
-        @foreach (var item in Model.MenuItems)
-        {
-            bool showCategory = false;
-            if (item.Category != lastCategory)
+        <div id="menu-header" class="menu-header card p-1" style="display: none;">
+            <h3>Construct your order from the menu items below</h3>
+        </div>
+        <div id="menu" class="menu card p-1" style="display: none;">
+            @{short? lastCategory = -1;}
+            @foreach (var item in Model.MenuItems)
             {
-                lastCategory = item.Category;
-                showCategory = true;
-            }
-            <div class="menu-item-category @if (showCategory) { Html.Raw("show-category"); } "></div>
-            <div class="menu-item-description-block">
-                <div class="menu-item-name">@item.Name</div>
-                @if (item.VegetarianFriendly.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-vegetarian-icon\"></div>"); }
-                @if (item.VeganFriendly.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-vegan-icon\"></div>"); }
-                @if (item.Spicy.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-spicy-icon\"></div>"); }
-                <div class="menu-item-description">@item.Description</div>
-                <div class="menu-item-allergens">@item.PossibleAllergens</div>
-            </div>
-            <div class="menu-item-price">@item.Price</div>
-            <div class="menu-item-action">
-                <div class="quantity buttons_added">
-                    @{ var optionString = "[";
-                        foreach (var option in item.MenuItemIngredient)
-                        {
-                            if (optionString.Length != 1)
-                                optionString += ',';
-                            optionString += "{ \"optionid\" : " + "\"menuoption-" + item.Id + "-" + option.IngredientId + "\",";
-                            optionString += "\"amount\" : " + option.ExtraPrice.ToString().Replace(',', '.') + "}";
-                        }
-                        optionString += "]";
-                    }
-                    <input type="button" value="-" class="minus" onclick="addOrder((@item.Price.ToString().Replace(',','.') * -1), 'menuitem-@item.Id', '@optionString');"><input id="menuitem-@item.Id" type="number" step="1" min="0" max="" name="quantity" value="0" title="Qty" class="input-text qty text" size="4" pattern="" inputmode=""><input onclick="addOrder((@item.Price.ToString().Replace(',','.')), 'menuitem-@item.Id', '@optionString');" type="button" value="+" class="plus">
-                </div>
-            </div>
-            foreach (var option in item.MenuItemIngredient)
-            {
-                if (!option.IsExtra.GetValueOrDefault())
+                bool showCategory = false;
+                if (item.Category != lastCategory)
                 {
-                    continue;
+                    lastCategory = item.Category;
+                    showCategory = true;
                 }
-                <div class="highlighted"></div>
-                <div class="menu-item-option-description highlighted pl-4"><span class="align-middle">@option.Ingredient.Name</span></div>
-                <div class="menu-item-price highlighted"><span class="align-middle">@option.ExtraPrice</span></div>
+                <div class="menu-item-category @if (showCategory) { Html.Raw("show-category"); } "></div>
+                <div class="menu-item-description-block">
+                    <div class="menu-item-name">@item.Name</div>
+                    @if (item.VegetarianFriendly.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-vegetarian-icon\"></div>"); }
+                    @if (item.VeganFriendly.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-vegan-icon\"></div>"); }
+                    @if (item.Spicy.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-spicy-icon\"></div>"); }
+                    <div class="menu-item-description">@item.Description</div>
+                    <div class="menu-item-allergens">@item.PossibleAllergens</div>
+                </div>
+                <div class="menu-item-price">@item.Price</div>
                 <div class="menu-item-action">
                     <div class="quantity buttons_added">
-                        <input type="button" value="-" class="minus" onclick="addOption((@option.ExtraPrice.ToString().Replace(',','.') * -1), 'menuoption-@item.Id-@option.IngredientId', 'menuitem-@item.Id');"><input id="menuoption-@item.Id-@option.IngredientId" type="number" step="1" min="0" max="" name="quantity" value="0" title="Qty" class="input-text qty text" size="4" pattern="" inputmode=""><input onclick="addOption((@option.ExtraPrice.ToString().Replace(',','.')), 'menuoption-@item.Id-@option.IngredientId', 'menuitem-@item.Id');" type="button" value="+" class="plus">
+                        @{ var optionString = "[";
+                            foreach (var option in item.MenuItemIngredient)
+                            {
+                                if (optionString.Length != 1)
+                                    optionString += ',';
+                                optionString += "{ \"optionid\" : " + "\"menuoption-" + item.Id + "-" + option.IngredientId + "\",";
+                                optionString += "\"amount\" : " + option.ExtraPrice.ToString().Replace(',', '.') + "}";
+                            }
+                            optionString += "]";
+                        }
+                        <input type="button" value="-" class="minus" onclick="addOrder((@item.Price.ToString().Replace(',','.') * -1), 'menuitem-@item.Id', '@optionString');"><input id="menuitem-@item.Id" type="number" step="1" min="0" max="" name="quantity" value="0" title="Qty" class="input-text qty text" size="4" pattern="" inputmode=""><input onclick="addOrder((@item.Price.ToString().Replace(',','.')), 'menuitem-@item.Id', '@optionString');" type="button" value="+" class="plus">
                     </div>
                 </div>
+                foreach (var option in item.MenuItemIngredient)
+                {
+                    if (!option.IsExtra.GetValueOrDefault())
+                    {
+                        continue;
+                    }
+                    <div class="highlighted"></div>
+                    <div class="menu-item-option-description highlighted pl-4"><span class="align-middle">@option.Ingredient.Name</span></div>
+                    <div class="menu-item-price highlighted"><span class="align-middle">@option.ExtraPrice</span></div>
+                    <div class="menu-item-action">
+                        <div class="quantity buttons_added">
+                            <input type="button" value="-" class="minus" onclick="addOption((@option.ExtraPrice.ToString().Replace(',','.') * -1), 'menuoption-@item.Id-@option.IngredientId', 'menuitem-@item.Id');"><input id="menuoption-@item.Id-@option.IngredientId" type="number" step="1" min="0" max="" name="quantity" value="0" title="Qty" class="input-text qty text" size="4" pattern="" inputmode=""><input onclick="addOption((@option.ExtraPrice.ToString().Replace(',','.')), 'menuoption-@item.Id-@option.IngredientId', 'menuitem-@item.Id');" type="button" value="+" class="plus">
+                        </div>
+                    </div>
+                }
             }
-        }
-    </div>
+        </div>
+    </form>
     <div id="confirmation-modal-container" class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -142,7 +144,7 @@
                     <p id="completed-modal-text">Your reservation has been submitted, select "Continue" to return to the home page.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary"  onclick="complete();">Continue</button>
+                    <button type="button" class="btn btn-primary" onclick="complete();">Continue</button>
                 </div>
             </div>
         </div>
@@ -156,7 +158,7 @@
 
         function confirm() {
             $('#confirmation-modal-container').modal('hide');
-            $('#completed-modal-container').modal('show');
+            document.getElementById("reservation-form").submit();
         }
 
         function submit() {

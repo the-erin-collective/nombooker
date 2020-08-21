@@ -37,5 +37,13 @@ namespace nombooker.Pages
                 ItemCategories.Add(menuItem.CategoryNavigation);
             }
         }
+
+        public IActionResult OnPost()
+        {
+            var reservation = new Reservation { Id = Guid.NewGuid(), ReservationStatusId = 1, StartDateTime = DateTime.Parse(Request.Form["datebutton"]) };
+            _context.Reservation.Add(reservation);
+            _context.SaveChanges();
+            return Redirect("/");
+        }
     }
 }
