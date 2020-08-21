@@ -23,7 +23,7 @@ namespace nombooker.Pages
 
         public void OnGet()
         {
-            restaurants = _context.Restaurant.ToList();
+            restaurants = _context.Restaurant.OrderBy(restaurant => restaurant.Name).ToList();
             _logger.LogDebug(restaurants.Count.ToString());
         }
     }

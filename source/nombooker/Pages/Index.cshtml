@@ -4,5 +4,16 @@
     ViewData["Title"] = "nombooker";
 }
 
+<h1 class="list-header">Select a restaurant to make a reservation</h1>
+
 @foreach (var restaurant in Model.restaurants)
-{<li>@restaurant.Name</li>}
+{
+    <li class="restuarant-list-item card mb-3 shadow" onclick="location.href='/Restaurant/?id=@restaurant.Id'">
+        <div class="row no-gutters">
+            <div class="col-md-2"><img class="restuarant-list-logo" src="data:image;base64,@System.Convert.ToBase64String(restaurant.LogoImage)" /></div>
+            <div class="restuarant-list-name col-md-8">
+                <div class="card-body">@restaurant.Name</div>
+            </div>
+        </div>
+    </li>
+}

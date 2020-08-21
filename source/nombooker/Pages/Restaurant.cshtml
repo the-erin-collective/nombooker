@@ -1,0 +1,296 @@
+﻿@page "{restaurant?}"
+@model RestaurantModel
+@{
+    ViewData["Title"] = "nombooker";
+}
+
+<p><a href="/" class="text-info">< Back</a></p>
+
+<div class="restaurant-page-content">
+    <div class="restuarant-page-banner">
+        <img class="restuarant-page-banner-image" src="data:image;base64,@System.Convert.ToBase64String(Model.Restaurant.BannerImage)" />
+        <div class="restuarant-page-banner-gradient"></div>
+    </div>
+    <div class="restuarant-page-logo-container card">
+        <img class="restuarant-page-logo" src="data:image;base64,@System.Convert.ToBase64String(Model.Restaurant.LogoImage)" />
+    </div>
+    <div class="restuarant-page-details card ml-3">
+        <span class="restuarant-page-details-name">@Model.Restaurant.Name</span>
+        <h5>Open from @Model.Restaurant.OpeningTime.ToString().Remove(5) - @Model.Restaurant.ClosingTime.ToString().Remove(5)</h5>
+    </div>
+    <div class="restuarant-page-reservation card shadow-sm">
+        <div class="restuarant-page-reservation-card-bg"></div>
+        <div class="restuarant-page-reservation-card-content">
+            <h3 class="ml-1">Make a reservation</h3>
+            <div class="restuarant-page-reservation-form">
+                <div class="restuarant-page-reservation-form-date">
+                    <div class="restuarant-page-reservation-date-block ml-3">
+                        <h5 class="restuarant-page-reservation-date-label">Select a date</h5>
+                        <div class="restuarant-page-reservation-date-input">
+                            <div><input type="date" name="datebutton" id="date-input"></div>
+                        </div>
+                        <div id="date-validation" class="restuarant-page-reservation-date-validation" style="display: none;">
+                            *Date cannot be in the past
+                        </div>
+                    </div>
+                </div>
+                <div class="restuarant-page-reservation-form-time">
+                    <div class="restuarant-page-reservation-date-block ml-3">
+                        <h5 class="restuarant-page-reservation-date-label">Select a time</h5>
+                        <div class="restuarant-page-reservation-date-input">
+                            <div><input id="time-input" type="time" name="timebutton" max="@Model.Restaurant.ClosingTime" min="@Model.Restaurant.OpeningTime" step="1800" pattern="[0-9]{2}:[0-9]{2}" required></div>
+                        </div>
+                        <div id="time-validation" class="restuarant-page-reservation-time-validation" style="display: none;">
+                            *Time cannot be outside trading hours
+                        </div>
+                    </div>
+                </div>
+                <div class="restuarant-page-reservation-form-order">
+                    <div id="add-order-button" class="btn btn-secondary" style="display: block;" onclick="document.getElementById('menu-header').style.display = 'block';document.getElementById('menu').style.display = 'grid';">Add Order</div>
+                    <div id="order-total-container" style="display: none;"><div>Order Total</div><div id="order-total-amount"></div></div>
+                </div>
+                <div class="restuarant-page-reservation-form-submit">
+                    <div class="btn btn-primary" style="display: block;" onclick="submit();">Submit</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="menu-header" class="menu-header card p-1" style="display: none;">
+        <h3>Construct your order from the menu items below</h3>
+    </div>
+    <div id="menu" class="menu card p-1" style="display: none;">
+        @{short? lastCategory = -1;}
+        @foreach (var item in Model.MenuItems)
+        {
+            bool showCategory = false;
+            if (item.Category != lastCategory)
+            {
+                lastCategory = item.Category;
+                showCategory = true;
+            }
+            <div class="menu-item-category @if (showCategory) { Html.Raw("show-category"); } "></div>
+            <div class="menu-item-description-block">
+                <div class="menu-item-name">@item.Name</div>
+                @if (item.VegetarianFriendly.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-vegetarian-icon\"></div>"); }
+                @if (item.VeganFriendly.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-vegan-icon\"></div>"); }
+                @if (item.Spicy.GetValueOrDefault()) { Html.Raw("<div class=\"menu-item-spicy-icon\"></div>"); }
+                <div class="menu-item-description">@item.Description</div>
+                <div class="menu-item-allergens">@item.PossibleAllergens</div>
+            </div>
+            <div class="menu-item-price">@item.Price</div>
+            <div class="menu-item-action">
+                <div class="quantity buttons_added">
+                    @{ var optionString = "[";
+                        foreach (var option in item.MenuItemIngredient)
+                        {
+                            if (optionString.Length != 1)
+                                optionString += ',';
+                            optionString += "{ \"optionid\" : " + "\"menuoption-" + item.Id + "-" + option.IngredientId + "\",";
+                            optionString += "\"amount\" : " + option.ExtraPrice.ToString().Replace(',', '.') + "}";
+                        }
+                        optionString += "]";
+                    }
+                    <input type="button" value="-" class="minus" onclick="addOrder((@item.Price.ToString().Replace(',','.') * -1), 'menuitem-@item.Id', '@optionString');"><input id="menuitem-@item.Id" type="number" step="1" min="0" max="" name="quantity" value="0" title="Qty" class="input-text qty text" size="4" pattern="" inputmode=""><input onclick="addOrder((@item.Price.ToString().Replace(',','.')), 'menuitem-@item.Id', '@optionString');" type="button" value="+" class="plus">
+                </div>
+            </div>
+            foreach (var option in item.MenuItemIngredient)
+            {
+                if (!option.IsExtra.GetValueOrDefault())
+                {
+                    continue;
+                }
+                <div class="highlighted"></div>
+                <div class="menu-item-option-description highlighted pl-4"><span class="align-middle">@option.Ingredient.Name</span></div>
+                <div class="menu-item-price highlighted"><span class="align-middle">@option.ExtraPrice</span></div>
+                <div class="menu-item-action">
+                    <div class="quantity buttons_added">
+                        <input type="button" value="-" class="minus" onclick="addOption((@option.ExtraPrice.ToString().Replace(',','.') * -1), 'menuoption-@item.Id-@option.IngredientId', 'menuitem-@item.Id');"><input id="menuoption-@item.Id-@option.IngredientId" type="number" step="1" min="0" max="" name="quantity" value="0" title="Qty" class="input-text qty text" size="4" pattern="" inputmode=""><input onclick="addOption((@option.ExtraPrice.ToString().Replace(',','.')), 'menuoption-@item.Id-@option.IngredientId', 'menuitem-@item.Id');" type="button" value="+" class="plus">
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <div id="confirmation-modal-container" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Submit reservation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmation-modal-text"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirm()">Book now!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="completed-modal-container" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reservation Complete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="complete();">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="completed-modal-text">Your reservation has been submitted, select "Continue" to return to the home page.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"  onclick="complete();">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.orderTotal = 0;
+
+        function complete() {
+            window.location.href = '/';
+        }
+
+        function confirm() {
+            $('#confirmation-modal-container').modal('hide');
+            $('#completed-modal-container').modal('show');
+        }
+
+        function submit() {
+            var timeEl = document.getElementById('time-input');
+            var timeValidation = document.getElementById('time-validation');
+            var dateEl = document.getElementById('date-input');
+            var dateValidation = document.getElementById('date-validation');
+            timeValidation.innerHTML = '';
+            dateValidation.innerHTML = '';
+            if (timeEl.value == "")
+                timeValidation.innerHTML = '* select a time';
+            if (dateEl.value == "")
+                dateValidation.innerHTML = '* select a date';
+            var date = dateEl.valueAsDate;
+            var now = (new Date()).toLocaleDateString('en-ZA');
+            if (date != null && date.toLocaleDateString('en-ZA') < now)
+                dateValidation.innerHTML = '* date cannot be before today';
+            if (timeEl.value != "" && '@Model.Restaurant.OpeningTime' > timeEl.value + ':00')
+                timeValidation.innerHTML = '* time cannot be before trading hours start';
+            else if (timeEl.value != "" && '@Model.Restaurant.ClosingTime' < timeEl.value + ':00')
+                timeValidation.innerHTML = '* time cannot be after trading hours end';
+
+            if (timeValidation.innerHTML != '')
+                timeValidation.style = 'block';
+            else
+                timeValidation.style = 'none';
+            if (dateValidation.innerHTML != '')
+                dateValidation.style = 'block';
+            else
+                dateValidation.style = 'none';
+
+
+            if (timeValidation.innerHTML == '' && dateValidation.innerHTML == '') {
+                var confirmationMessage = 'Your reservation at @Model.Restaurant.Name for ' + timeEl.value + ' on ' + dateEl.value + ' ';
+                var orderTotal = document.getElementById('order-total-amount').innerHTML;
+                if (orderTotal.length > 0) {
+                    confirmationMessage += 'with an order coming to ' + orderTotal + ' ';
+                }
+                confirmationMessage += 'is ready for submission.';
+                document.getElementById('confirmation-modal-text').innerHTML = confirmationMessage;
+                $('#confirmation-modal-container').modal('show');
+            }
+        }
+
+        function addOrder(amount, elementID, optionObjects) {
+            console.log(amount, elementID);
+            var item = document.getElementById(elementID);
+            var options = JSON.parse('{ "options": ' + optionObjects + ' }').options;
+            if (amount < 0) {
+                setTimeout(() => {
+                    options.forEach(option => {
+                        optionEl = document.getElementById(option.optionid);
+                        if (optionEl.value > item.value) {
+                            addOption((option.amount * -1), option.optionid, elementID);
+                        }
+                    });
+                }, 50);
+                var quantity = item.value;
+                if (quantity == 0)
+                    return;
+            }
+            adjustTotal(amount);
+        }
+
+        function addOption(amount, optionElementId, itemElementId) {
+            var option = document.getElementById(optionElementId);
+            var item = document.getElementById(itemElementId);
+            console.log(amount, optionElementId, itemElementId);
+            if (amount < 0) {
+                if (option.value == 0)
+                    return;
+            }
+            if (amount > 0 && item.value == option.value) {
+                setTimeout(() => { removeOptionAfterWait(optionElementId, itemElementId); }, 50);
+                return;
+            }
+            setTimeout(() => {
+                addOptionAfterWait(amount, optionElementId, itemElementId);
+            }, 50);
+        }
+
+        function removeOptionAfterWait(optionElementId, itemElementId) {
+            var option = document.getElementById(optionElementId);
+            var item = document.getElementById(itemElementId);
+            if (item.value < option.value) {
+                option.value = item.value;
+            }
+        }
+
+        function addOptionAfterWait(amount, optionElementId, itemElementId) {
+            removeOptionAfterWait(optionElementId, itemElementId);
+            adjustTotal(amount);
+        }
+
+        function adjustTotal(amount) {
+            if (window.orderTotal < 0)
+                window.orderTotal = 0;
+            var newAmount = Math.round(amount * 100);
+            window.orderTotal += newAmount;
+            if (orderTotal == 0) {
+                document.getElementById('order-total-container').style.display = 'none';
+                document.getElementById('add-order-button').style.display = 'block';
+            } else {
+                document.getElementById('add-order-button').style.display = 'none';
+                document.getElementById('order-total-container').style.display = 'block';
+            }
+
+            document.getElementById('order-total-amount').innerHTML = (orderTotal / 100).toLocaleString('en-ZA', {
+                style: 'currency',
+                currency: 'ZAR',
+            });;
+        }
+
+        function wcqib_refresh_quantity_increments() {
+            jQuery("div.quantity:not(.buttons_added), td.quantity:not(.buttons_added)").each(function (a, b) {
+                var c = jQuery(b);
+                c.addClass("buttons_added"), c.children().first().before('<input type="button" value="-" class="minus" />'), c.children().last().after('<input type="button" value="+" class="plus" />')
+            })
+        }
+        String.prototype.getDecimals || (String.prototype.getDecimals = function () {
+            var a = this,
+                b = ("" + a).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+            return b ? Math.max(0, (b[1] ? b[1].length : 0) - (b[2] ? +b[2] : 0)) : 0
+        }), jQuery(document).ready(function () {
+            wcqib_refresh_quantity_increments()
+        }), jQuery(document).on("updated_wc_div", function () {
+            wcqib_refresh_quantity_increments()
+        }), jQuery(document).on("click", ".plus, .minus", function () {
+            var a = jQuery(this).closest(".quantity").find(".qty"),
+                b = parseFloat(a.val()),
+                c = parseFloat(a.attr("max")),
+                d = parseFloat(a.attr("min")),
+                e = a.attr("step");
+            b && "" !== b && "NaN" !== b || (b = 0), "" !== c && "NaN" !== c || (c = ""), "" !== d && "NaN" !== d || (d = 0), "any" !== e && "" !== e && void 0 !== e && "NaN" !== parseFloat(e) || (e = 1), jQuery(this).is(".plus") ? c && b >= c ? a.val(c) : a.val((b + parseFloat(e)).toFixed(e.getDecimals())) : d && b <= d ? a.val(d) : b > 0 && a.val((b - parseFloat(e)).toFixed(e.getDecimals())), a.trigger("change")
+        });
+    </script>
+</div>
