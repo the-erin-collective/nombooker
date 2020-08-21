@@ -40,7 +40,7 @@ namespace nombooker.Pages
 
         public IActionResult OnPost()
         {
-            var reservation = new Reservation { Id = Guid.NewGuid(), ReservationStatusId = 1, StartDateTime = DateTime.Parse(Request.Form["datebutton"]) };
+            var reservation = new Reservation { Id = Guid.NewGuid(), ReservationStatusId = 1, StartDateTime = DateTime.Parse(Request.Form["datebutton"] + " " + Request.Form["timebutton"]) };
             _context.Reservation.Add(reservation);
             _context.SaveChanges();
             return Redirect("/");
